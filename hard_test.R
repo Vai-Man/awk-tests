@@ -36,7 +36,7 @@ run_awk_query <- function(expr, file = "diamonds.csv") {
                 "x" = "$8", "y" = "$9", "z" = "$10")
   
   for (col in names(col_dict)) {
-    eq <- gsub(col, col_dict[[col]], eq)
+    eq <- gsub(sprintf("\\b%s\\b", col), col_dict[[col]], eq)
   }
   
   # Build and run the command
