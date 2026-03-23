@@ -13,12 +13,13 @@ Uses AWK logic inside `fread()`.
 
 ### 3. Hard Test (`hard_test.R`)
 Implements an R to AWK Translator.
-- **`run_awk_query()`**: Translates an R condition string into an AWK string.
+- **Public API**: Exposes two dedicated functions (`awk_read()` and `awk_count()`) building on an internal parser (`run_awk_query()`).
   - Dynamically extracts column names from the target dataset and maps them to AWK indices (`$1`, `$2`, etc.) so the function works on any data set.
   - Translates R logic (`and`, `or`, `&`, `|`) into AWK logic (`&&`, `||`).
-  - Converts `%in% c(...)` into multiple `||` conditions.
   - **OS Compatibility**: Detects the host operating system (`.Platform$OS.type`) to correctly format and quote the AWK command strings (handling `cmd.exe` limitations on Windows).
-- **Execution**: Tests three conditions (`price >= 1000`, `carat <= 1 and color == 'E'`, `cut %in% c('Premium', 'Ideal')`) and passes the output to `fread()`.
+  - **Dependency Verification**: Implements `check_awk_binary()` to safely verify if `awk` or `gawk` is present in the system PATH.
+  - **Record Counting**: the native `awk_count()` function prevents data loading entirely and instead compiles an `END {print count}` block within the AWK script, returning an instant, highly memory-efficient integer count of matches directly to R.
+- **Execution**: Demonstrates usage of `awk_read()` and `awk_count()` executing translations over `price >= 1000`, `carat <= 1 and color == 'E'`, and `cut %in% c('Premium', 'Ideal')`.
 
 ## Requirements
 - R >= 4.0.0
