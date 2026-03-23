@@ -4,7 +4,7 @@ fwrite(x = diamonds, file = "diamonds.csv")
 
 # R-to-AWK Translator
 
-run_awk_query <- function(expr, file = "diamonds.csv") {
+run_awk_query <- function(expr, file = "diamonds.csv", sep = ",") {
   # Change single quotes to double quotes for AWK
   eq <- gsub("'", "\"", expr)
   
@@ -30,19 +30,25 @@ run_awk_query <- function(expr, file = "diamonds.csv") {
     eq <- sub("(\\w+)\\s*%in%\\s*c\\(([^)]+)\\)", or_clause_wrapped, eq)
   }
 
-  # Map known diamonds columns to AWK indices
-  col_dict <- c("carat" = "$1", "cut" = "$2", "color" = "$3", "clarity" = "$4", 
-                "depth" = "$5", "table" = "$6", "price" = "$7", 
-                "x" = "$8", "y" = "$9", "z" = "$10")
+  # Read column names from the file header dynamically
+  header <- names(fread(file, nrows = 0, sep = sep))
   
-  for (col in names(col_dict)) {
-    eq <- gsub(sprintf("\\b%s\\b", col), col_dict[[col]], eq)
+  # Map dynamically found columns to AWK fields ($1, $2, ...)
+  for (i in seq_along(header)) {
+    col_name <- header[i]
+    awk_var <- paste("$", i, sep = "")
+    # Use word boundaries so that shorter variables don't replace parts of longer ones
+    eq <- gsub(sprintf("\\b%s\\b", col_name), awk_var, eq)
   }
   
   # Build and run the command
-  cmd <- sprintf("awk -F ',' 'NR==1 || (%s)' '%s'", eq, file)
+  cmd <- sprintf("awk -F '%s' 'NR==1 || (%s)' '%s'", sep, eq, file)
   cat("AWK command:", cmd, "\n")
-  print(fread(cmd = cmd))
+  
+  result <- fread(cmd = cmd, sep = sep)
+  print(result)
+  
+  return(invisible(result))
 }
 
 # Demonstrations

@@ -14,7 +14,7 @@ Uses AWK logic inside `fread()`.
 ### 3. Hard Test (`hard_test.R`)
 Implements an R to AWK Translator.
 - **`run_awk_query()`**: Translates an R condition string into an AWK string.
-  - Maps `diamonds` column names to AWK indices (`$1`, `$2`, etc.) using a predefined dictionary.
+  - Dynamically extracts column names from the target dataset and maps them to AWK indices (`$1`, `$2`, etc.) so the function works on any data set.
   - Translates R logic (`and`, `or`, `&`, `|`) into AWK logic (`&&`, `||`).
   - Converts `%in% c(...)` into multiple `||` conditions.
 - **Execution**: Tests three conditions (`price >= 1000`, `carat <= 1 and color == 'E'`, `cut %in% c('Premium', 'Ideal')`) and passes the output to `fread()`.
