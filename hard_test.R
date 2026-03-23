@@ -41,8 +41,19 @@ run_awk_query <- function(expr, file = "diamonds.csv", sep = ",") {
     eq <- gsub(sprintf("\\b%s\\b", col_name), awk_var, eq)
   }
   
-  # Build and run the command
-  cmd <- sprintf("awk -F '%s' 'NR==1 || (%s)' '%s'", sep, eq, file)
+  # Cross-Platform formatting: detect OS to handle shell quoting rules
+  os_is_win <- .Platform$OS.type == "windows"
+  
+  if (os_is_win) {
+    # On Windows cmd.exe, the awk script must be enclosed in double quotes.
+    # Therefore, any double quotes inside the awk script must be escaped.
+    eq_win <- gsub('"', '\\\\"', eq)
+    cmd <- sprintf('awk -F "%s" "NR==1 || (%s)" "%s"', sep, eq_win, file)
+  } else {
+    # On Unix-like systems, single quotes safely enclose the script for bash.
+    cmd <- sprintf("awk -F '%s' 'NR==1 || (%s)' '%s'", sep, eq, file)
+  }
+  
   cat("AWK command:", cmd, "\n")
   
   result <- fread(cmd = cmd, sep = sep)

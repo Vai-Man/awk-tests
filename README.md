@@ -17,6 +17,7 @@ Implements an R to AWK Translator.
   - Dynamically extracts column names from the target dataset and maps them to AWK indices (`$1`, `$2`, etc.) so the function works on any data set.
   - Translates R logic (`and`, `or`, `&`, `|`) into AWK logic (`&&`, `||`).
   - Converts `%in% c(...)` into multiple `||` conditions.
+  - **OS Compatibility**: Detects the host operating system (`.Platform$OS.type`) to correctly format and quote the AWK command strings (handling `cmd.exe` limitations on Windows).
 - **Execution**: Tests three conditions (`price >= 1000`, `carat <= 1 and color == 'E'`, `cut %in% c('Premium', 'Ideal')`) and passes the output to `fread()`.
 
 ## Requirements
